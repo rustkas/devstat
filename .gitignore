@@ -23,3 +23,5 @@ coverage/
 dist/
 build/
 
+# Trae IDE state (must never be committed)
+.trae/
