@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://beamline.schemas/state/v1.0.0",
-  "title": "Beamline State (v1.0.0)",
+  "$id": "https://devstate.schemas/state/v1.0.0",
+  "title": "DevState Schema (v1.0.0)",
   "type": "object",
   "additionalProperties": true,
   "required": ["project", "version", "current_cp", "no_drift", "agents", "artifact_checksums", "updated_at"],

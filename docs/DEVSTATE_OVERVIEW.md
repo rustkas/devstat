@@ -13,7 +13,7 @@ Purpose: Source-of-Truth for `.trae/state.json` and `.trae/history.json` with HM
 
 ### Prerequisites
 - Docker and Docker Compose
-- Environment variables: `DB_*`, `HMAC_SECRET` (preferred) or legacy `BEAMLINE_HMAC_SECRET`
+- Environment variables: `DB_*`, `HMAC_SECRET`
 
 ### Start Services
 ```bash
@@ -40,7 +40,7 @@ curl 'http://localhost:8080/v1/devstate/verify?limit=10'
 ## Collaboration
 
 - Share `.env` template via `config/env/.env.example` without secrets.
-- Use `HMAC_SECRET` (or legacy `BEAMLINE_HMAC_SECRET`) from a secret manager or local dev `.env` with `dev-secret-not-for-prod`.
+- Use `HMAC_SECRET` from a secret manager or local dev `.env` with `dev-secret-not-for-prod`.
 - Operations are audited via history chain; use locks to coordinate concurrent changes.
 
 ## Scaling & Reliability

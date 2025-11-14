@@ -11,8 +11,8 @@ const { Client } = require('pg');
 // Env
 const DATABASE_URL = process.env.DATABASE_URL;
 const DB_SCHEMA = process.env.DB_SCHEMA || 'public';
-// Prefer neutral env; fallback to legacy BEAMLINE_HMAC_SECRET
-const HMAC_SECRET = process.env.HMAC_SECRET || process.env.BEAMLINE_HMAC_SECRET;
+// HMAC secret (DevState only)
+const HMAC_SECRET = process.env.HMAC_SECRET;
 // Detect repository root: allow override via REPO_ROOT, otherwise if running from devstate/server,
 // use two-level up as monorepo root; else default to cwd.
 function detectRepoRoot() {

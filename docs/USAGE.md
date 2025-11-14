@@ -6,13 +6,13 @@
 
 ## Prerequisites
 - Docker Desktop or PostgreSQL 15+ reachable via `DATABASE_URL`.
-- Env vars: `DATABASE_URL`, `HMAC_SECRET` (kept outside VCS; `BEAMLINE_HMAC_SECRET` supported for legacy).
+- Env vars: `DATABASE_URL`, `HMAC_SECRET` (kept outside VCS).
 
 ## Schema Initialization
 Run the SQL:
 
 ```
-psql "$DATABASE_URL" -f apps/otp/beamline_store/sql/init_devstate.sql
+psql "$DATABASE_URL" -f devstate/sql/init_devstate.sql
 ```
 
 Tables created:
@@ -23,12 +23,12 @@ Tables created:
 ## Commands (CLI)
 
 ```
-node apps/otp/beamline_store/mcp/devstate-server.js get_state
-node apps/otp/beamline_store/mcp/devstate-server.js update_state '{"current_cp":"CP0-LC"}'
-node apps/otp/beamline_store/mcp/devstate-server.js append_history '{"actor":"trae","action":"advance_cp","cp_from":"CP0-LC","cp_to":"CP1-LC","state_checksum":"sha256:..."}'
-node apps/otp/beamline_store/mcp/devstate-server.js verify_hmac_chain
-node apps/otp/beamline_store/mcp/devstate-server.js export_files
-node apps/otp/beamline_store/mcp/devstate-server.js import_files
+node devstate/server/devstate-server.js get_state
+node devstate/server/devstate-server.js update_state '{"current_cp":"CP0-LC"}'
+node devstate/server/devstate-server.js append_history '{"actor":"devstate","action":"advance_cp","cp_from":"CP0-LC","cp_to":"CP1-LC","state_checksum":"sha256:..."}'
+node devstate/server/devstate-server.js verify_hmac_chain
+node devstate/server/devstate-server.js export_files
+node devstate/server/devstate-server.js import_files
 ```
 
 ## CI Integration
@@ -58,7 +58,7 @@ node apps/otp/beamline_store/mcp/devstate-server.js import_files
 - Locking: use `lock_state(scope, ttl)` and `unlock_state(lock_id)` for critical updates.
 
 ## Security
-- Secrets are only via env; never commit `BEAMLINE_HMAC_SECRET`.
+- Secrets are only via env; never commit secrets.
 - Logs contain only errors; no secrets printed.
 - Regular DB backups and recovery tests recommended.
 

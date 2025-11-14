@@ -1,9 +1,9 @@
 {
   "name": "devstate",
-  "description": "State & Audit service for Beamline Constructor: manages .trae/state.json and .trae/history.json with HMAC verification.",
+  "description": "State & Audit service: manages .trae/state.json and .trae/history.json with HMAC verification.",
   "version": "0.1.0",
   "maintainers": [
-    "Beamline Constructor Platform Team"
+    "DevState Maintainers"
   ],
   "ports": {
     "http": 3180,
@@ -13,8 +13,7 @@
   "docs": [
     "devstate/docs/README.md",
     "devstate/docs/DEVSTATE_OVERVIEW.md",
-    "devstate/docs/MCP_USAGE.md",
-    "devstate/docs/BEAMLINE_STORE_TZ.md"
+    "devstate/docs/USAGE.md"
   ],
   "scripts": [
     "devstate/scripts/devstate.sh",

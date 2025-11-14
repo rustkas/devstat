@@ -113,7 +113,6 @@ ORDER BY id DESC
 LIMIT 100;
 
 -- Notes:
--- * HMAC calculation is performed in the application using BEAMLINE_HMAC_SECRET.
+-- * HMAC calculation is performed in the application using HMAC_SECRET.
 -- * This schema enforces chain continuity via hmac_prev but does not verify HMAC correctness.
 -- * Transactions should combine append_history and update_state when needed.
-

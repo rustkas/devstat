@@ -1,4 +1,4 @@
-# DevState — State & Audit Service for Beamline Constructor
+# DevState — State & Audit Service
 
 DevState is a lightweight HTTP service that manages the project state (`.trae/state.json`) and audit history (`.trae/history.json`), enforces No-Drift, and verifies an HMAC chain of operations. It is designed to support development consistency across IDEs and CI/CD pipelines.
 

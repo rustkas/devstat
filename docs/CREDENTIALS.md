@@ -5,13 +5,13 @@ This document tracks local development accounts and secrets, and describes safe 
 ## Accounts
 
 - PostgreSQL:
-  - `DB_NAME=beamline`
-  - `DB_USER=beamline`
+  - `DB_NAME=devstate`
+  - `DB_USER=devstate`
   - `DB_PASSWORD=dev_password` (local only; change in production)
   - `DB_PORT=5432`
 
 - DevState HMAC:
-  - `BEAMLINE_HMAC_SECRET=dev-secret-not-for-prod` (local only)
+  - `HMAC_SECRET=dev-secret-not-for-prod` (local only)
 
 ## Storage & Access
 
@@ -21,7 +21,6 @@ This document tracks local development accounts and secrets, and describes safe 
 
 ## Rotation & Security
 
-- Rotate `BEAMLINE_HMAC_SECRET` in production and re-seal history with controlled process.
+- Rotate `HMAC_SECRET` in production and re-seal history with controlled process.
 - Enforce least privilege on DB connections; restrict network access.
 - Audit all changes via history entries and verify HMAC chain regularly.
-
