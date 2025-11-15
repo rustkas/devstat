@@ -1,0 +1,71 @@
+name: OpenAPI Client Bump & Releases
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'openapi.yaml'
+
+jobs:
+  bump-and-tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Bump TS client minor version
+        id: bump_ts
+        run: |
+          node -e "const fs=require('fs');const p='./clients/typescript/package.json';const j=JSON.parse(fs.readFileSync(p));const [maj,min,patch]=String(j.version||'0.1.0').split('.').map(Number);const v=[maj,min+1,0].join('.');j.version=v;fs.writeFileSync(p,JSON.stringify(j,null,2));console.log(v)"
+      - name: Bump Python client minor version
+        id: bump_py
+        run: |
+          python - <<'PY'
+import re
+from pathlib import Path
+p=Path('clients/python/pyproject.toml')
+t=p.read_text()
+m=re.search(r'version\s*=\s*"([0-9.]+)"',t)
+cur=m.group(1) if m else '0.1.0'
+maj,min,patch=map(int,cur.split('.'))
+v=f"{maj}.{min+1}.0"
+t=re.sub(r'version\s*=\s*"[0-9.]+"',f'version = "{v}"',t)
+p.write_text(t)
+print(v)
+PY
+      - name: Commit version bumps
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add clients/typescript/package.json clients/python/pyproject.toml
+          git commit -m "chore(release): bump client versions due to OpenAPI change" || echo "No changes"
+          git push
+      - name: Create client tags
+        run: |
+          TS_VER=$(node -e "console.log(require('./clients/typescript/package.json').version)")
+          PY_VER=$(python - <<'PY'
+import re
+print(__import__('pathlib').Path('clients/python/pyproject.toml').read_text().split('version = ')[1].split('\n')[0].strip('\"'))
+PY
+          )
+          git tag client-ts-v${TS_VER}
+          git tag client-py-v${PY_VER}
+          git push origin client-ts-v${TS_VER}
+          git push origin client-py-v${PY_VER}
+      - name: Create Release (TS)
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: client-ts-v${{ steps.bump_ts.outputs.stdout }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release (Py)
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: client-py-v${{ steps.bump_py.outputs.stdout }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
