@@ -4,7 +4,6 @@
 ![downloads](https://img.shields.io/github/downloads/rustkas/devstate/total?style=for-the-badge)
 ![repo-size](https://img.shields.io/github/repo-size/rustkas/devstate?style=for-the-badge)
 [![license](https://img.shields.io/github/license/rustkas/devstate?style=for-the-badge)](https://github.com/rustkas/devstate/blob/main/LICENSE)
-[![coverage](https://codecov.io/gh/rustkas/devstate/graph/badge.svg?token=${CODECOV_TOKEN})](https://codecov.io/gh/rustkas/devstate)
 
 DevState is a lightweight HTTP service that manages the project state (`.trae/state.json`) and audit history (`.trae/history.json`), enforces No-Drift, and verifies an HMAC chain of operations. It is designed to support development consistency across IDEs and CI/CD pipelines.
 
