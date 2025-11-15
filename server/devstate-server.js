@@ -344,9 +344,13 @@ async function searchHistory(filters = {}) {
     if (filters.action) { where.push(`action = $${p++}`); params.push(filters.action); }
     if (filters.since) { where.push(`ts >= $${p++}`); params.push(new Date(filters.since)); }
     if (filters.until) { where.push(`ts <= $${p++}`); params.push(new Date(filters.until)); }
-    const sql = `SELECT id, ts, actor, action, cp_from, cp_to, state_checksum, hmac_prev, hmac, metadata FROM ${DB_SCHEMA}.history_entries` + (where.length ? (' WHERE ' + where.join(' AND ')) : '') + ' ORDER BY id DESC LIMIT 1000';
+    const limit = Math.min(Number(filters.limit || 100), 1000);
+    const cursor = filters.cursor ? Number(filters.cursor) : undefined;
+    if (cursor) { where.push(`id < $${p++}`); params.push(cursor); }
+    const sql = `SELECT id, ts, actor, action, cp_from, cp_to, state_checksum, hmac_prev, hmac, metadata FROM ${DB_SCHEMA}.history_entries` + (where.length ? (' WHERE ' + where.join(' AND ')) : '') + ` ORDER BY id DESC LIMIT ${limit}`;
     const res = await client.query(sql, params);
-    return res.rows;
+    const last = res.rows.length ? res.rows[res.rows.length - 1].id : null;
+    return { items: res.rows, next_cursor: last };
   } finally {
     await client.end();
   }

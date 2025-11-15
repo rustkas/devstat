@@ -108,7 +108,7 @@ app.delete('/v1/devstate/locks/:id', async (req, res) => {
   }
 });
 
-// Search history
+// Search history (paginated)
 app.get('/v1/devstate/history/search', async (req, res) => {
   try {
     const filters = {
@@ -116,6 +116,8 @@ app.get('/v1/devstate/history/search', async (req, res) => {
       action: req.query.action,
       since: req.query.since,
       until: req.query.until,
+      limit: req.query.limit,
+      cursor: req.query.cursor,
     };
     const result = await mcp.searchHistory(filters);
     res.json(result);

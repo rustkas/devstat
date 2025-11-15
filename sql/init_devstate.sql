@@ -106,6 +106,14 @@ CREATE TABLE IF NOT EXISTS devstate_locks (
 CREATE INDEX IF NOT EXISTS idx_devstate_locks_scope ON devstate_locks (scope);
 CREATE INDEX IF NOT EXISTS idx_devstate_locks_expires ON devstate_locks (expires_at);
 
+-- Schema migrations registry
+CREATE TABLE IF NOT EXISTS schema_migrations (
+  version INTEGER PRIMARY KEY,
+  applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+INSERT INTO schema_migrations(version) VALUES (1)
+ON CONFLICT (version) DO NOTHING;
+
 -- Optional: HMAC key registry for rotation
 CREATE TABLE IF NOT EXISTS devstate_keys (
   id TEXT PRIMARY KEY,
