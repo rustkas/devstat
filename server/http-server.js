@@ -171,3 +171,42 @@ const PORT = process.env.DEVSTATE_HTTP_PORT ? Number(process.env.DEVSTATE_HTTP_P
 app.listen(PORT, () => {
   console.log(`DevState HTTP server listening on port ${PORT}`);
 });
+// OpenAPI-like minimal docs (JSON)
+app.get('/openapi.json', (_req, res) => {
+  res.json({
+    openapi: '3.0.0',
+    info: { title: 'DevState API', version: 'v1' },
+    paths: {
+      '/health': { get: { summary: 'Health check' } },
+      '/v1/devstate/verify': { get: { summary: 'Verify HMAC chain' } },
+      '/v1/devstate/state': { get: { summary: 'Get state' }, post: { summary: 'Update state' } },
+      '/v1/devstate/history': { post: { summary: 'Append history entry' } },
+      '/v1/devstate/history/search': { get: { summary: 'Search history (paginated)' } },
+      '/v1/devstate/history/{id}': { delete: { summary: 'Tombstone history entry' } },
+      '/v1/devstate/export': { get: { summary: 'Export .trae files' } },
+      '/v1/devstate/import': { post: { summary: 'Import .trae files' } },
+      '/v1/devstate/keys/active': { get: { summary: 'Get active HMAC key' } },
+      '/v1/devstate/keys/rotate': { post: { summary: 'Rotate HMAC key' } },
+    },
+  });
+});
+// HMAC key endpoints
+app.get('/v1/devstate/keys/active', async (_req, res) => {
+  try {
+    const key = await mcp.getActiveKey();
+    res.json(key || {});
+  } catch (e) {
+    res.status(500).json({ error: 'get_active_key_failed', message: e.message });
+  }
+});
+
+app.post('/v1/devstate/keys/rotate', async (req, res) => {
+  try {
+    const { id, secret } = req.body || {};
+    if (!id || !secret) return res.status(400).json({ error: 'invalid_params' });
+    const result = await mcp.rotateKey(id, secret);
+    res.json(result);
+  } catch (e) {
+    res.status(400).json({ error: 'rotate_key_failed', message: e.message });
+  }
+});

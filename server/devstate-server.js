@@ -80,7 +80,36 @@ function checksumForJson(obj) {
 }
 
 function hmacHex(message) {
-  return crypto.createHmac('sha256', HMAC_SECRET).update(message).digest('hex');
+  const key = HMAC_SECRET;
+  return crypto.createHmac('sha256', key).update(message).digest('hex');
+}
+
+async function getActiveKey() {
+  const client = pgClient();
+  await client.connect();
+  try {
+    const res = await client.query(`SELECT id, secret FROM ${DB_SCHEMA}.devstate_keys WHERE active = true ORDER BY created_at DESC LIMIT 1`);
+    return res.rowCount ? res.rows[0] : null;
+  } finally {
+    await client.end();
+  }
+}
+
+async function rotateKey(id, secret) {
+  const client = pgClient();
+  await client.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query(`UPDATE ${DB_SCHEMA}.devstate_keys SET active = false WHERE active = true`);
+    await client.query(`INSERT INTO ${DB_SCHEMA}.devstate_keys(id, secret, active) VALUES ($1, $2, true)`, [id, secret]);
+    await client.query('COMMIT');
+    return { ok: true, kid: id };
+  } catch (e) {
+    await client.query('ROLLBACK');
+    throw e;
+  } finally {
+    await client.end();
+  }
 }
 
 function stableStringify(obj) {
@@ -133,7 +162,8 @@ async function updateState(patch, actor = 'system') {
     const newChecksum = checksumForJson(updatedJson);
     await client.query(`UPDATE ${DB_SCHEMA}.state_current SET json = $1, checksum = $2, updated_at = NOW() WHERE id = 1`, [updatedJson, newChecksum]);
     const hprev = await lastHistoryHmac(client);
-    const meta = redact({ patch_keys: Object.keys(patch) });
+    const active = await getActiveKey();
+    const meta = redact({ patch_keys: Object.keys(patch), kid: active ? active.id : undefined });
     const hmsg = JSON.stringify({ checksum: newChecksum, meta });
     const hmac = hmacHex(hmsg);
     await client.query(
@@ -160,7 +190,8 @@ async function appendHistory(entry) {
   await client.connect();
   try {
     const hprev = await lastHistoryHmac(client);
-    const clean = Object.assign({}, entry, { metadata: redact(entry.metadata || {}) });
+    const active = await getActiveKey();
+    const clean = Object.assign({}, entry, { metadata: redact(Object.assign({}, entry.metadata || {}, { kid: active ? active.id : undefined })) });
     const message = JSON.stringify(clean);
     const hmac = hmacHex(message);
     await client.query(
@@ -410,4 +441,6 @@ module.exports = {
   unlockState,
   searchHistory,
   tombstoneHistory,
+  getActiveKey,
+  rotateKey,
 };
