@@ -1,6 +1,5 @@
-version: "3.8"
-
 services:
+
   db:
     image: postgres:15-alpine
     container_name: devstate-db
