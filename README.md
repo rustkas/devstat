@@ -79,4 +79,4 @@ MIT. See `LICENSE`.
 Package compliance: `server/package.json` declares `MIT`.
 
 ## Maintainers
-- AIGROUP / Beamline Constructor platform team.
+- AIGROUP / [Beamline Constructor platform team](https://github.com/BeamLine-Development).
