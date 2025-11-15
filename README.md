@@ -63,6 +63,33 @@ Environment variables (Compose):
 - `HMAC_SECRET` — HMAC secret for audit verification (default dev-only value).
 - `DATABASE_URL` — Postgres connection string (see compose).
 - `PGHOST`, `DB_SCHEMA` — Postgres host and schema.
+Security:
+- Set `DEVSTATE_API_TOKEN` to protect mutating endpoints (Bearer token).
+
+## Deployment (CI/CD)
+- Verify workflow: `.github/workflows/devstate-verify.yml` (compose up → health → verify → export).
+- No‑Drift deny: `.github/workflows/no-drift-deny.yml` (blocks PR if `.trae/*` tracked).
+- OpenAPI release and clients: TS/Go/Python workflows publish artifacts on tags.
+
+## Metrics
+Shields.io badges (replace `USER/REPO`):
+
+![stars](https://img.shields.io/github/stars/rustkas/devstate?style=for-the-badge)
+![forks](https://img.shields.io/github/forks/rustkas/devstate?style=for-the-badge)
+![issues](https://img.shields.io/github/issues/rustkas/devstate?style=for-the-badge)
+![last-commit](https://img.shields.io/github/last-commit/rustkas/devstate?style=for-the-badge)
+![ci](https://img.shields.io/github/actions/workflow/status/rustkas/devstate/devstate-verify.yml?style=for-the-badge)
+
+Traffic (unofficial):
+
+![visitors](https://visitor-badge.laobi.icu/badge?page_id=rustkas.devstate)
+![views](https://komarev.com/ghpvc/?username=rustkas&repo=devstate&style=for-the-badge)
+
+GitHub Metrics (optional):
+
+![Metrics](./github-metrics.svg)
+
+To enable auto metrics, add `.github/workflows/metrics.yml` with a PAT stored in `METRICS_TOKEN`.
 
 ## API
 - `GET /health` — returns service status.
