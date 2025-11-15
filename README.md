@@ -1,16 +1,9 @@
 # DevState — State & Audit Service
 
-![stars](https://img.shields.io/github/stars/rustkas/devstate?style=for-the-badge)
-![forks](https://img.shields.io/github/forks/rustkas/devstate?style=for-the-badge)
-![issues](https://img.shields.io/github/issues/rustkas/devstate?style=for-the-badge)
-![last-commit](https://img.shields.io/github/last-commit/rustkas/devstate?style=for-the-badge)
 ![ci](https://img.shields.io/github/actions/workflow/status/rustkas/devstate/devstate-verify.yml?style=for-the-badge)
 ![visitors](https://visitor-badge.laobi.icu/badge?page_id=rustkas.devstate)
-![views](https://komarev.com/ghpvc/?username=rustkas&repo=devstate&style=for-the-badge)
-![release](https://img.shields.io/github/v/release/rustkas/devstate?style=for-the-badge)
 ![downloads](https://img.shields.io/github/downloads/rustkas/devstate/total?style=for-the-badge)
 ![repo-size](https://img.shields.io/github/repo-size/rustkas/devstate?style=for-the-badge)
-![languages](https://img.shields.io/github/languages/count/rustkas/devstate?style=for-the-badge)
 
 DevState is a lightweight HTTP service that manages the project state (`.trae/state.json`) and audit history (`.trae/history.json`), enforces No-Drift, and verifies an HMAC chain of operations. It is designed to support development consistency across IDEs and CI/CD pipelines.
 
@@ -83,25 +76,7 @@ Security:
 - No‑Drift deny: `.github/workflows/no-drift-deny.yml` (blocks PR if `.trae/*` tracked).
 - OpenAPI release and clients: TS/Go/Python workflows publish artifacts on tags.
 
-## Metrics
-Shields.io badges (replace `USER/REPO`):
-
-![stars](https://img.shields.io/github/stars/rustkas/devstate?style=for-the-badge)
-![forks](https://img.shields.io/github/forks/rustkas/devstate?style=for-the-badge)
-![issues](https://img.shields.io/github/issues/rustkas/devstate?style=for-the-badge)
-![last-commit](https://img.shields.io/github/last-commit/rustkas/devstate?style=for-the-badge)
-![ci](https://img.shields.io/github/actions/workflow/status/rustkas/devstate/devstate-verify.yml?style=for-the-badge)
-
-Traffic (unofficial):
-
-![visitors](https://visitor-badge.laobi.icu/badge?page_id=rustkas.devstate)
-![views](https://komarev.com/ghpvc/?username=rustkas&repo=devstate&style=for-the-badge)
-
-GitHub Metrics (optional):
-
-![Metrics](./github-metrics.svg)
-
-To enable auto metrics, add `.github/workflows/metrics.yml` with a PAT stored in `METRICS_TOKEN`.
+ 
 
 ## Observability Assets
 - Prometheus scrape example: `docs/prometheus_scrape.yml` (targets `localhost:3180`, path `/metrics`).
