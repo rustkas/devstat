@@ -19,7 +19,7 @@ jobs:
       - name: Start DevState Compose
         run: |
           docker compose -f docker-compose.yml up -d
-          sleep 5
+          for i in $(seq 1 20); do curl -fsS http://localhost:3180/health && break || sleep 1; done
 
       - name: Health check
         run: |
@@ -29,7 +29,7 @@ jobs:
         env:
           DEVSTATE_HTTP_PORT: 3080
         run: |
-          curl -fsS 'http://localhost:3180/v1/devstate/verify?limit=0'
+          curl -fsS 'http://localhost:3180/v1/devstate/verify?limit=0' || (docker compose -f docker-compose.yml logs devstate && exit 1)
 
       - name: Export .trae files
         run: |
