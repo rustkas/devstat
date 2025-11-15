@@ -1,0 +1,44 @@
+name: DevState Verify
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Start DevState Compose
+        run: |
+          docker compose -f docker-compose.yml up -d
+          sleep 5
+
+      - name: Health check
+        run: |
+          curl -fsS http://localhost:3180/health
+
+      - name: Verify HMAC chain
+        env:
+          DEVSTATE_HTTP_PORT: 3080
+        run: |
+          curl -fsS 'http://localhost:3180/v1/devstate/verify?limit=0'
+
+      - name: Export .trae files
+        run: |
+          curl -fsS http://localhost:3180/v1/devstate/export
+
+      - name: Upload .trae artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: trae-state
+          path: |
+            .trae/state.json
+            .trae/history.json
