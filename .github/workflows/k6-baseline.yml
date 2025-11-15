@@ -18,10 +18,22 @@ jobs:
         uses: grafana/k6-action@v0.2.0
         with:
           filename: tests/k6/verify.js
+          flags: --summary-export=verify-summary.json
+      - name: Upload verify summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-verify-summary
+          path: verify-summary.json
       - name: Run k6 append baseline
         uses: grafana/k6-action@v0.2.0
         with:
           filename: tests/k6/append.js
+          flags: --summary-export=append-summary.json
+      - name: Upload append summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-append-summary
+          path: append-summary.json
       - name: Stop Compose
         run: |
           docker compose -f docker-compose.yml down -v
