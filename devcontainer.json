@@ -1,0 +1,8 @@
+{
+  "name": "DevState",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "devstate",
+  "workspaceFolder": "/workspace",
+  "postCreateCommand": "curl -fsS http://localhost:3180/health || true",
+  "features": {}
+}

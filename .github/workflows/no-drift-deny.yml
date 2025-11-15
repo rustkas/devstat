@@ -1,0 +1,17 @@
+name: No-Drift Deny
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  deny-trae-files:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure .trae/* not tracked
+        run: |
+          if git ls-files -- .trae | grep -q '.'; then
+            echo '.trae files must not be committed';
+            exit 1;
+          fi

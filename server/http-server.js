@@ -16,6 +16,7 @@
 const express = require('express');
 const cors = require('cors');
 const client = require('prom-client');
+const rateLimit = require('express-rate-limit');
 
 // Import domain methods from DevState core server
 const mcp = require('./devstate-server.js');
@@ -208,5 +209,17 @@ app.post('/v1/devstate/keys/rotate', async (req, res) => {
     res.json(result);
   } catch (e) {
     res.status(400).json({ error: 'rotate_key_failed', message: e.message });
+  }
+});
+// Rate limiting for mutating endpoints
+const limiter = rateLimit({ windowMs: 60 * 1000, max: 120 });
+app.use(['/v1/devstate/state', '/v1/devstate/history', '/v1/devstate/import', '/v1/devstate/locks', '/v1/devstate/keys/rotate'], limiter);
+// Scheduled cleanup (lazy endpoint to trigger) — can be wired to cron
+app.post('/v1/devstate/locks/cleanup', async (_req, res) => {
+  try {
+    const result = await mcp.cleanupExpiredLocks();
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: 'locks_cleanup_failed', message: e.message });
   }
 });
