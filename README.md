@@ -1,7 +1,6 @@
 # DevState — State & Audit Service
 
 ![ci](https://img.shields.io/github/actions/workflow/status/rustkas/devstate/devstate-verify.yml?style=for-the-badge)
-![visitors](https://visitor-badge.laobi.icu/badge?page_id=rustkas.devstate)
 ![downloads](https://img.shields.io/github/downloads/rustkas/devstate/total?style=for-the-badge)
 ![repo-size](https://img.shields.io/github/repo-size/rustkas/devstate?style=for-the-badge)
 
