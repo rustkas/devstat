@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  grafana:
+    image: grafana/grafana-oss:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./grafana_dashboard.json:/var/lib/grafana/dashboards/grafana_dashboard.json:ro
+      - ./grafana_dashboard_extended.json:/var/lib/grafana/dashboards/grafana_dashboard_extended.json:ro
+    restart: unless-stopped

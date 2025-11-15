@@ -1,0 +1,43 @@
+name: Code Coverage
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install deps
+        run: |
+          cd server
+          npm init -y >/dev/null 2>&1 || true
+          npm install nyc --save-dev
+      - name: Start DevState Compose
+        run: |
+          docker compose -f docker-compose.yml up -d
+          for i in {1..60}; do
+            if curl -fsS http://localhost:3180/health >/dev/null; then echo ready; break; fi; sleep 2; done
+      - name: Run unit tests with coverage
+        env:
+          DATABASE_URL: postgresql://devstate:dev_password@localhost:55432/devstate
+          HMAC_SECRET: dev-secret-not-for-prod
+          DB_SCHEMA: public
+        run: |
+          npx nyc --reporter=lcov --report-dir=coverage node tests/unit/devstate_core.spec.js
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          flags: server
+          fail_ci_if_error: false
+      - name: Stop Compose
+        run: |
+          docker compose -f docker-compose.yml down -v

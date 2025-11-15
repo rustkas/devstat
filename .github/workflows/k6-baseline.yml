@@ -10,10 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Setup k6 dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
       - name: Start DevState Compose
         run: |
           docker compose -f docker-compose.yml up -d
-          sleep 5
+          for i in {1..60}; do
+            if curl -fsS http://localhost:3180/health >/dev/null; then echo ready; break; fi; sleep 2; done
       - name: Run k6 verify baseline
         uses: grafana/k6-action@v0.2.0
         with:
@@ -23,7 +28,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: k6-verify-summary
-          path: verify-summary.json
+          path: |
+            verify-summary.json
+            verify-summary.html
       - name: Run k6 append baseline
         uses: grafana/k6-action@v0.2.0
         with:
@@ -33,7 +40,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: k6-append-summary
-          path: append-summary.json
+          path: |
+            append-summary.json
+            append-summary.html
       - name: Stop Compose
         run: |
           docker compose -f docker-compose.yml down -v

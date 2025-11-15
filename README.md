@@ -71,6 +71,21 @@ Environment variables (Compose):
 Security:
 - Set `DEVSTATE_API_TOKEN` to protect mutating endpoints (Bearer token).
 
+## Security Practices
+- Bearer token
+  - Generate a strong token and set `DEVSTATE_API_TOKEN` on the server; clients pass `Authorization: Bearer <token>`.
+  - Store tokens in secret managers; avoid committing tokens to code or configs.
+- HMAC rotation
+  - Use `/v1/devstate/keys/rotate` to publish a new active key; record `kid` in history metadata.
+  - Schedule rotation (e.g., monthly/quarterly); verify chain with `/v1/devstate/verify` after rotation.
+- Rate-limit
+  - Default limiter: 120 req/min for mutating endpoints; adjust per environment.
+  - Recommended: `state`/`history` ≤ 120 rpm, `verify` ≤ 600 rpm.
+- Best practices
+  - Protect API behind reverse proxy with TLS/mTLS in production.
+  - Monitor `append_fail_total`, `state_update_fail_total`, and success rate per route.
+  - Audit: all changes append to `history_entries` with HMAC chain; export `.trae/*` for cross‑IDE sync.
+
 ## Deployment (CI/CD)
 - Verify workflow: `.github/workflows/devstate-verify.yml` (compose up → health → verify → export).
 - No‑Drift deny: `.github/workflows/no-drift-deny.yml` (blocks PR if `.trae/*` tracked).
@@ -82,6 +97,16 @@ Security:
 - Prometheus scrape example: `docs/prometheus_scrape.yml` (targets `localhost:3180`, path `/metrics`).
 - Grafana dashboard example: `docs/grafana_dashboard.json` (p95 verify, failure counts, rate‑limited, locks).
 - Grafana extended dashboard: `docs/grafana_dashboard_extended.json` (latency percentiles, throughput, error metrics).
+- Real-time updates: Prometheus pulls `/metrics`; ensure scrape interval ≤ `15s` and Grafana dashboard refresh set to `5s`.
+
+## Deploy Observability
+- Commands:
+  - `docker compose -f docs/compose-prometheus.yml up -d`
+  - `docker compose -f docs/compose-grafana.yml up -d`
+  - Import dashboards in Grafana (URL: `http://localhost:3000/`, password `admin`).
+ - Prometheus: start with scrape config above; validate targets state.
+ - Grafana: import JSON dashboards via UI; set refresh to `5s`.
+ - Production monitoring: set alerts for p95 latency, success rate < 95%, and append/state failures increase; configure dashboards per tenant if multi-tenant.
 
 ## API
 - `GET /health` — returns service status.
@@ -94,10 +119,22 @@ Security:
 - Scripts: `devstate/scripts/README.md`
 
 ## Troubleshooting
-- Verify returns 500: ensure DB initialized (compose auto-init enabled) and `HMAC_SECRET` set; on first run, `/v1/devstate/verify` returns `{ ok: true }` if history empty.
-- Import fails: validate `.trae/state.json` against schema and check HMAC chain in `.trae/history.json`.
+- Health check fails: verify that `docker compose` started DB and server; check logs with `docker compose logs`.
+- Verify returns 500: on empty history chain server returns `{ ok: true }`; ensure DB is initialized and `HMAC_SECRET` set.
+- Import/Export .trae:
+  - Import errors: validate `.trae/state.json` against `docs/STATE.schema.json`; ensure HMAC chain in `.trae/history.json` is consistent.
+  - Export issues: verify write permissions to `.trae/`; check resulting file checksums.
+- HTTP codes:
+  - 200: success for verify/state/history operations.
+  - 400: validation failure (state schema, append payload); check error message.
+  - 429: rate-limited; reduce request rate or increase limits.
+  - 500: server errors; inspect logs and metrics.
+- Metrics analysis:
+  - Latency histograms: `devstate_*_duration_seconds` expose buckets; use Grafana panels for p95/p99.
+  - Success rate: computed via `devstate_request_total{status='200'}` over total per route.
+  - Fail counters: `devstate_append_fail_total`, `devstate_state_update_fail_total` for error tracking.
 - Bearer token required: set `DEVSTATE_API_TOKEN` in server env and pass `Authorization: Bearer <token>`.
- - k6 append errors: check `DEVSTATE_API_TOKEN` is provided in workflow or remove `requireAuth` for tests.
+- k6 append errors: check `DEVSTATE_API_TOKEN` is provided in workflow or remove `requireAuth` for tests.
 
 ## Clients QuickStart
 - TypeScript: `npm install @rustkas/devstate-client` → see `clients/typescript/README.md` for usage.

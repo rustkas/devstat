@@ -38,6 +38,7 @@ const stateUpdateFail = new client.Counter({ name: 'devstate_state_update_fail_t
 const verifyDuration = new client.Histogram({ name: 'devstate_verify_duration_seconds', help: 'Verify duration', buckets: [0.01,0.05,0.1,0.5,1,2,5], registers: [register] });
 const appendDuration = new client.Histogram({ name: 'devstate_append_duration_seconds', help: 'Append duration', buckets: [0.01,0.05,0.1,0.5,1,2,5], registers: [register] });
 const stateUpdateDuration = new client.Histogram({ name: 'devstate_state_update_duration_seconds', help: 'State update duration', buckets: [0.01,0.05,0.1,0.5,1,2,5], registers: [register] });
+const rateLimited = new client.Counter({ name: 'devstate_rate_limited_total', help: 'Rate limited requests', registers: [register] });
 
 // Health
 app.get('/health', (_req, res) => {
@@ -237,7 +238,21 @@ app.post('/v1/devstate/keys/rotate', async (req, res) => {
   }
 });
 // Rate limiting for mutating endpoints
-const limiter = rateLimit({ windowMs: 60 * 1000, max: 120 });
+const limiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 120,
+  handler: (req, res, _next) => {
+    rateLimited.inc();
+    const r = req.path.includes('/state') ? 'state'
+      : req.path.includes('/history') ? 'history'
+      : req.path.includes('/import') ? 'import'
+      : req.path.includes('/locks') ? 'locks'
+      : req.path.includes('/keys/rotate') ? 'keys_rotate'
+      : 'unknown';
+    requestTotal.inc({ route: r, status: '429' });
+    res.status(429).json({ error: 'rate_limited', message: 'Too many requests' });
+  }
+});
 app.use(['/v1/devstate/state', '/v1/devstate/history', '/v1/devstate/import', '/v1/devstate/locks', '/v1/devstate/keys/rotate'], limiter);
 // Scheduled cleanup (lazy endpoint to trigger) — can be wired to cron
 app.post('/v1/devstate/locks/cleanup', async (_req, res) => {

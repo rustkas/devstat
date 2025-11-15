@@ -1,0 +1,38 @@
+name: API Smoke Tests
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start DevState Compose
+        run: |
+          docker compose -f docker-compose.yml up -d
+          for i in {1..60}; do
+            if curl -fsS http://localhost:3180/health >/dev/null; then echo ready; break; fi; sleep 2; done
+      - name: Health
+        run: |
+          curl -fsS http://localhost:3180/health | jq .
+      - name: Verify
+        run: |
+          curl -fsS 'http://localhost:3180/v1/devstate/verify?limit=0' | jq .
+      - name: State get
+        run: |
+          curl -fsS 'http://localhost:3180/v1/devstate/state' | jq .
+      - name: State post
+        run: |
+          curl -fsS -X POST 'http://localhost:3180/v1/devstate/state' -H 'Content-Type: application/json' -d '{"no_drift": true}' | jq .
+      - name: History append
+        run: |
+          curl -fsS -X POST 'http://localhost:3180/v1/devstate/history' -H 'Content-Type: application/json' -d '{"actor":"smoke","action":"append","metadata":{"rnd":"test"}}' | jq .
+      - name: History search
+        run: |
+          curl -fsS 'http://localhost:3180/v1/devstate/history/search?action=append&limit=5' | jq .
+      - name: Stop Compose
+        run: |
+          docker compose -f docker-compose.yml down -v

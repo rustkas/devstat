@@ -1,0 +1,27 @@
+name: Clients Smoke
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  ts-client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install axios
+        run: npm install axios
+      - name: Start DevState Compose
+        run: |
+          docker compose -f docker-compose.yml up -d
+          for i in {1..60}; do
+            if curl -fsS http://localhost:3180/health >/dev/null; then echo ready; break; fi; sleep 2; done
+      - name: Run TS client smoke
+        run: node tests/client/ts/basic.spec.js
+      - name: Stop Compose
+        run: docker compose -f docker-compose.yml down -v
