@@ -26,4 +26,6 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
+          PKG_VERSION=$(node -e "console.log(require('./clients/typescript/package.json').version)")
+          echo "Publishing version $PKG_VERSION"
           npm -C clients/typescript publish --access public --registry=https://registry.npmjs.org
