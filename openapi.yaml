@@ -190,3 +190,24 @@ paths:
       responses:
         '200': { description: Rotation result }
         default: { $ref: '#/components/responses/Error' }
+  /v1/devstate/history/archive:
+    post:
+      summary: Archive history entries older than cutoff
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                days: { type: integer, default: 30 }
+      responses:
+        '200':
+          description: Archive result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  archived_count: { type: integer }

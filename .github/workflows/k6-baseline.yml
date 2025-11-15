@@ -1,0 +1,23 @@
+name: k6 Baseline Verify
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  k6:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start DevState Compose
+        run: |
+          docker compose -f docker-compose.yml up -d
+          sleep 5
+      - name: Run k6 verify baseline
+        uses: grafana/k6-action@v0.2.0
+        with:
+          filename: tests/k6/verify.js
+      - name: Stop Compose
+        run: |
+          docker compose -f docker-compose.yml down -v
