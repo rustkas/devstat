@@ -91,6 +91,10 @@ GitHub Metrics (optional):
 
 To enable auto metrics, add `.github/workflows/metrics.yml` with a PAT stored in `METRICS_TOKEN`.
 
+## Observability Assets
+- Prometheus scrape example: `docs/prometheus_scrape.yml` (targets `localhost:3180`, path `/metrics`).
+- Grafana dashboard example: `docs/grafana_dashboard.json` (p95 verify, failure counts, rate‑limited, locks).
+
 ## API
 - `GET /health` — returns service status.
 

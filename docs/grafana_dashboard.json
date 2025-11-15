@@ -1,0 +1,33 @@
+{
+  "title": "DevState Overview",
+  "panels": [
+    {
+      "type": "graph",
+      "title": "Verify Duration (p95)",
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum(rate(devstate_verify_duration_seconds_bucket[5m])) by (le))" }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Verify Failures (5m)",
+      "targets": [
+        { "expr": "increase(devstate_hmac_verify_fail_total[5m])" }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Rate Limited (5m)",
+      "targets": [
+        { "expr": "increase(devstate_rate_limited_total[5m])" }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Locks Active",
+      "targets": [
+        { "expr": "devstate_locks_active" }
+      ]
+    }
+  ]
+}
