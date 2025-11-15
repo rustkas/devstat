@@ -16,7 +16,7 @@ jobs:
           node-version: '20'
       - name: Install generator
         run: |
-          npm -C clients/typescript install
+          npm -C clients/typescript install --no-audit --no-fund
       - name: Generate TS client from OpenAPI
         run: |
           npm -C clients/typescript run gen

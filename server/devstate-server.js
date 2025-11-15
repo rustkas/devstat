@@ -239,8 +239,7 @@ async function tombstoneHistory(targetId, actor = 'system') {
 }
 
 async function verifyHmacChain(limit = 0) {
-  const client = pgClient();
-  await client.connect();
+  const client = await pgPoolClient();
   try {
     const sql = `SELECT id, hmac_prev, hmac, metadata, state_checksum, actor, action, cp_from, cp_to, ts FROM ${DB_SCHEMA}.history_entries ORDER BY id ASC` + (limit > 0 ? ' LIMIT ' + Number(limit) : '');
     const res = await client.query(sql);
@@ -267,7 +266,7 @@ async function verifyHmacChain(limit = 0) {
     }
     return { ok: true };
   } finally {
-    await client.end();
+    client.release();
   }
 }
 
