@@ -12,6 +12,7 @@ services:
       - "55432:5432"
     volumes:
       - devstate_db_data:/var/lib/postgresql/data
+      - ./sql/init_devstate.sql:/docker-entrypoint-initdb.d/init_devstate.sql:ro
 
   devstate:
     build:
